@@ -45,7 +45,32 @@ public class TrainServiceImpl implements TrainService {
         // TODO
         // First, get all routes contains [startCity, endCity]
         // Then, Get all trains on that day with the wanted routes
-        return null;
+        List<RouteEntity> routes = routeDao.findAll(); // 获取所有路线信息
+
+        List<RouteEntity> filteredRoutes = routes.stream()
+                .filter(route -> {
+                    List<Long> stationIds = route.getStationIds();
+                    return stationIds.contains(startStationId) && stationIds.contains(endStationId);
+                }).toList();
+
+        List<TrainEntity> trainsOnDate = trainDao.findAll().stream()
+                .filter(train -> train.getDate().equals(date)).toList();
+
+        List<TrainEntity> matchingTrains = new ArrayList<>();
+
+        for (RouteEntity route : filteredRoutes) {
+            for (TrainEntity train : trainsOnDate) {
+                if (train.getRouteId().equals(route.getId())) {
+                    matchingTrains.add(train);
+                }
+            }
+        }
+
+        List<TrainVO> trainVOS = matchingTrains.stream()
+                .map(TrainMapper.INSTANCE::toTrainVO)
+                .collect(Collectors.toList());
+
+        return trainVOS;
     }
 
     @Override
@@ -66,21 +91,50 @@ public class TrainServiceImpl implements TrainService {
         }
         entity.setExtraInfos(new ArrayList<String>(Collections.nCopies(route.getStationIds().size(), "预计正点")));
         switch (entity.getTrainType()) {
-            case HIGH_SPEED:
-                entity.setSeats(GSeriesSeatStrategy.INSTANCE.initSeatMap(route.getStationIds().size()));
-                break;
-            case NORMAL_SPEED:
-                entity.setSeats(KSeriesSeatStrategy.INSTANCE.initSeatMap(route.getStationIds().size()));
-                break;
+            case HIGH_SPEED -> entity.setSeats(GSeriesSeatStrategy.INSTANCE.initSeatMap(route.getStationIds().size()));
+            case NORMAL_SPEED -> entity.setSeats(KSeriesSeatStrategy.INSTANCE.initSeatMap(route.getStationIds().size()));
         }
         trainDao.save(entity);
     }
 
     @Override
-    public void changeTrain(Long id, String name, Long routeId, TrainType type, String date, List<Date> arrivalTimes,
-                            List<Date> departureTimes) {
+    public void changeTrain(Long id, String name, Long routeId, TrainType type, String date,
+                            List<Date> arrivalTimes, List<Date> departureTimes) {
         // TODO: edit train info, please refer to `addTrain` above
+        TrainEntity train = trainDao.findById(id).orElse(null);
+        if (train == null) {
+            throw new BizException(CommonErrorType.NOT_FOUND, "指定的火车信息不存在");
+        }
+
+        train.setName(name);
+        train.setRouteId(routeId);
+        train.setTrainType(type);
+        train.setDate(date);
+        train.setArrivalTimes(arrivalTimes);
+        train.setDepartureTimes(departureTimes);
+
+        RouteEntity route = routeDao.findById(routeId).orElse(null);
+        if (route == null) {
+            throw new BizException(CommonErrorType.NOT_FOUND, "指定的路线信息不存在");
+        }
+
+        if (route.getStationIds().size() != arrivalTimes.size()
+                || route.getStationIds().size() != departureTimes.size()) {
+            throw new BizException(CommonErrorType.ILLEGAL_ARGUMENTS, "列表长度错误");
+        }
+
+        train.setExtraInfos(new ArrayList<>(Collections.nCopies(route.getStationIds().size(), "预计正点")));
+
+        switch (type) {
+            case HIGH_SPEED -> train.setSeats(GSeriesSeatStrategy.INSTANCE.initSeatMap(route.getStationIds().size()));
+            case NORMAL_SPEED -> train.setSeats(KSeriesSeatStrategy.INSTANCE.initSeatMap(route.getStationIds().size()));
+
+            // Add more cases for other train types if necessary
+        }
+
+        trainDao.save(train);
     }
+
 
     @Override
     public void deleteTrain(Long id) {
