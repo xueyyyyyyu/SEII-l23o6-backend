@@ -12,6 +12,7 @@ import org.fffd.l23o6.mapper.TrainMapper;
 import org.fffd.l23o6.pojo.entity.RouteEntity;
 import org.fffd.l23o6.pojo.entity.TrainEntity;
 import org.fffd.l23o6.pojo.enum_.TrainType;
+import org.fffd.l23o6.pojo.vo.train.TicketInfo;
 import org.fffd.l23o6.service.TrainService;
 import org.fffd.l23o6.pojo.vo.train.AdminTrainVO;
 import org.fffd.l23o6.pojo.vo.train.TrainVO;
@@ -44,7 +45,6 @@ public class TrainServiceImpl implements TrainService {
     public List<TrainVO> listTrains(Long startStationId, Long endStationId, String date) {
         // TODO
         // First, get all routes contains [startCity, endCity]
-        // Then, Get all trains on that day with the wanted routes
         List<RouteEntity> routes = routeDao.findAll(); // 获取所有路线信息
 
         List<RouteEntity> filteredRoutes = routes.stream()
@@ -53,6 +53,7 @@ public class TrainServiceImpl implements TrainService {
                     return stationIds.contains(startStationId) && stationIds.contains(endStationId);
                 }).toList();
 
+        // Then, Get all trains on that day with the wanted routes
         List<TrainEntity> trainsOnDate = trainDao.findAll().stream()
                 .filter(train -> train.getDate().equals(date)).toList();
 
@@ -66,11 +67,46 @@ public class TrainServiceImpl implements TrainService {
             }
         }
 
-        List<TrainVO> trainVOS = matchingTrains.stream()
-                .map(TrainMapper.INSTANCE::toTrainVO)
+
+        List<TrainVO> trainVOs = matchingTrains.stream()
+                .map(train -> {
+
+                    TrainVO trainVO = TrainMapper.INSTANCE.toTrainVO(train);
+                    //String trainType = trainVO.getTrainType();
+                    //trainVO.setId();
+                    trainVO.setStartStationId(startStationId);
+                    trainVO.setEndStationId(endStationId);
+                    //TODO
+                    //trainVO.setDepartureTime();
+                    //trainVO.setArrivalTime();
+                    List<TicketInfo> ticketInfoList = new ArrayList<>();
+                    if(train.getTrainType().getText().equals("高铁")){
+                        TicketInfo ticketInfo1 = new TicketInfo("商务座",1,1);
+                        TicketInfo ticketInfo2 = new TicketInfo("一等座",1,1);
+                        TicketInfo ticketInfo3 = new TicketInfo("二等座",1,1);
+                        TicketInfo ticketInfo4 = new TicketInfo("无座",1,1);
+                        ticketInfoList.add(ticketInfo1);
+                        ticketInfoList.add(ticketInfo2);
+                        ticketInfoList.add(ticketInfo3);
+                        ticketInfoList.add(ticketInfo4);
+                    }else {
+                        TicketInfo ticketInfo1 = new TicketInfo("软卧",1,1);
+                        TicketInfo ticketInfo2 = new TicketInfo("硬卧",1,1);
+                        TicketInfo ticketInfo3 = new TicketInfo("软座",1,1);
+                        TicketInfo ticketInfo4 = new TicketInfo("硬座",1,1);
+                        TicketInfo ticketInfo5 = new TicketInfo("无座",1 ,1);
+                        ticketInfoList.add(ticketInfo1);
+                        ticketInfoList.add(ticketInfo2);
+                        ticketInfoList.add(ticketInfo3);
+                        ticketInfoList.add(ticketInfo4);
+                        ticketInfoList.add(ticketInfo5);
+                    }
+                    trainVO.setTicketInfo(ticketInfoList);
+                    return trainVO;
+                })
                 .collect(Collectors.toList());
 
-        return trainVOS;
+        return trainVOs;
     }
 
     @Override
