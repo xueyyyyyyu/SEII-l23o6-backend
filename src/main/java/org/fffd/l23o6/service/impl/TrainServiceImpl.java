@@ -72,14 +72,16 @@ public class TrainServiceImpl implements TrainService {
                 .map(train -> {
 
                     TrainVO trainVO = TrainMapper.INSTANCE.toTrainVO(train);
-                    //String trainType = trainVO.getTrainType();
-                    //trainVO.setId();
+
                     trainVO.setStartStationId(startStationId);
                     trainVO.setEndStationId(endStationId);
                     //TODO
-                    //trainVO.setDepartureTime();
-                    //trainVO.setArrivalTime();
+                    TrainDetailVO trainDetailVO = getTrain(trainVO.getId());
+                    trainVO.setDepartureTime(getDepartureTimeByStationId(trainDetailVO, startStationId));
+                    trainVO.setArrivalTime(getArrivalTimeByStationId(trainDetailVO, endStationId));
+
                     List<TicketInfo> ticketInfoList = new ArrayList<>();
+
                     if(train.getTrainType().getText().equals("高铁")){
                         TicketInfo ticketInfo1 = new TicketInfo("商务座",1,1);
                         TicketInfo ticketInfo2 = new TicketInfo("一等座",1,1);
@@ -101,13 +103,45 @@ public class TrainServiceImpl implements TrainService {
                         ticketInfoList.add(ticketInfo4);
                         ticketInfoList.add(ticketInfo5);
                     }
+
                     trainVO.setTicketInfo(ticketInfoList);
+
                     return trainVO;
                 })
                 .collect(Collectors.toList());
 
         return trainVOs;
     }
+
+    public Date getDepartureTimeByStationId(TrainDetailVO trainDetailVO, Long stationId) {
+        List<Long> stationIds = trainDetailVO.getStationIds();
+        List<Date> departureTimes = trainDetailVO.getDepartureTimes();
+
+        if (stationIds != null && departureTimes != null && stationIds.size() == departureTimes.size()) {
+            int index = stationIds.indexOf(stationId);
+            if (index != -1) {
+                return departureTimes.get(index);
+            }
+        }
+
+        return null;
+    }
+
+    public Date getArrivalTimeByStationId(TrainDetailVO trainDetailVO, Long stationId) {
+        List<Long> stationIds = trainDetailVO.getStationIds();
+        List<Date> arrivalTimes = trainDetailVO.getArrivalTimes();
+
+        if (stationIds != null && arrivalTimes != null && stationIds.size() == arrivalTimes.size()) {
+            int index = stationIds.indexOf(stationId);
+            if (index != -1) {
+                return arrivalTimes.get(index);
+            }
+        }
+
+        return null;
+    }
+
+
 
     @Override
     public List<AdminTrainVO> listTrainsAdmin() {
