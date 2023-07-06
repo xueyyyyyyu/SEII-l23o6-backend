@@ -67,11 +67,50 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
 
     public @Nullable String allocSeat(int startStationIndex, int endStationIndex, KSeriesSeatType type, boolean[][] seatMap) {
         //endStationIndex - 1 = upper bound
-        return null;
+        // TODO
+        return "b";
     }
 
     public Map<KSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
-        return null;
+        Map<KSeriesSeatStrategy.KSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
+        int count1 = 0, count2 = 0, count3 = 0, count4 = 0;
+        for(int j = 0; j < 8; j++) {
+            for (int i = startStationIndex; i < endStationIndex; i++) {
+                if (seatMap[i][j])
+                    break;
+                if (i == endStationIndex - 1)
+                    count1++;
+            }
+        }
+        for(int j = 8; j < 20; j++){
+            for (int i = startStationIndex; i < endStationIndex; i++) {
+                if (seatMap[i][j])
+                    break;
+                if (i == endStationIndex - 1)
+                    count2++;
+            }
+        }
+        for(int j = 20; j < 36; j++){
+            for (int i = startStationIndex; i < endStationIndex; i++) {
+                if (seatMap[i][j])
+                    break;
+                if (i == endStationIndex - 1)
+                    count3++;
+            }
+        }
+        for(int j = 36; j < 56; j++){
+            for (int i = startStationIndex; i < endStationIndex; i++) {
+                if (seatMap[i][j])
+                    break;
+                if (i == endStationIndex - 1)
+                    count4++;
+            }
+        }
+        leftSeatCount.put(KSeriesSeatType.SOFT_SLEEPER_SEAT,count1);
+        leftSeatCount.put(KSeriesSeatType.HARD_SLEEPER_SEAT, count2);
+        leftSeatCount.put(KSeriesSeatType.SOFT_SEAT, count3);
+        leftSeatCount.put(KSeriesSeatType.HARD_SEAT, count4);
+        return leftSeatCount;
     }
 
     public boolean[][] initSeatMap(int stationCount) {
