@@ -66,46 +66,64 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
 
 
     public @Nullable String allocSeat(int startStationIndex, int endStationIndex, KSeriesSeatType type, boolean[][] seatMap) {
-        //endStationIndex - 1 = upper bound
-        // TODO
-        return "b";
+        Map<Integer, String> seatTypeMap = TYPE_MAP.get(type);
+        /*if (type.equals(KSeriesSeatType.SOFT_SLEEPER_SEAT)){
+
+        } else if (type.equals(KSeriesSeatType.HARD_SLEEPER_SEAT)){
+
+        } else if (type.equals(KSeriesSeatType.SOFT_SEAT)){
+
+        } else if (type.equals(KSeriesSeatType.HARD_SEAT)){
+
+        }*/
+        return "null";
     }
+
 
     public Map<KSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
         Map<KSeriesSeatStrategy.KSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
         int count1 = 0, count2 = 0, count3 = 0, count4 = 0;
-        for(int j = 0; j < 8; j++) {
+
+        int offset = 0;
+        for(int j = 0; j < SOFT_SLEEPER_SEAT_MAP.size(); j++) {
             for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j])
+                if (seatMap[i][j + offset])
                     break;
                 if (i == endStationIndex - 1)
                     count1++;
             }
         }
-        for(int j = 8; j < 20; j++){
+
+        offset += SOFT_SLEEPER_SEAT_MAP.size();
+        for(int j = 0; j < HARD_SLEEPER_SEAT_MAP.size(); j++){
             for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j])
+                if (seatMap[i][j + offset])
                     break;
                 if (i == endStationIndex - 1)
                     count2++;
             }
         }
-        for(int j = 20; j < 36; j++){
+
+        offset += HARD_SLEEPER_SEAT_MAP.size();
+        for(int j = 0; j < SOFT_SEAT_MAP.size(); j++){
             for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j])
+                if (seatMap[i][j + offset])
                     break;
                 if (i == endStationIndex - 1)
                     count3++;
             }
         }
-        for(int j = 36; j < 56; j++){
+
+        offset += SOFT_SEAT_MAP.size();
+        for(int j = 0; j < HARD_SEAT_MAP.size(); j++){
             for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j])
+                if (seatMap[i][j + offset])
                     break;
                 if (i == endStationIndex - 1)
                     count4++;
             }
         }
+
         leftSeatCount.put(KSeriesSeatType.SOFT_SLEEPER_SEAT,count1);
         leftSeatCount.put(KSeriesSeatType.HARD_SLEEPER_SEAT, count2);
         leftSeatCount.put(KSeriesSeatType.SOFT_SEAT, count3);
