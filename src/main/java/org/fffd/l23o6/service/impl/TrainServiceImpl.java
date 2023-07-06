@@ -1,9 +1,6 @@
 package org.fffd.l23o6.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.fffd.l23o6.dao.RouteDao;
@@ -75,28 +72,42 @@ public class TrainServiceImpl implements TrainService {
 
                     trainVO.setStartStationId(startStationId);
                     trainVO.setEndStationId(endStationId);
-                    //TODO
                     TrainDetailVO trainDetailVO = getTrain(trainVO.getId());
                     trainVO.setDepartureTime(getDepartureTimeByStationId(trainDetailVO, startStationId));
                     trainVO.setArrivalTime(getArrivalTimeByStationId(trainDetailVO, endStationId));
 
                     List<TicketInfo> ticketInfoList = new ArrayList<>();
 
+                    // TODO price
                     if(train.getTrainType().getText().equals("高铁")){
-                        TicketInfo ticketInfo1 = new TicketInfo("商务座",1,1);
-                        TicketInfo ticketInfo2 = new TicketInfo("一等座",1,1);
-                        TicketInfo ticketInfo3 = new TicketInfo("二等座",1,1);
-                        TicketInfo ticketInfo4 = new TicketInfo("无座",1,1);
+                        Map<GSeriesSeatStrategy.GSeriesSeatType, Integer> leftSeatCount
+                                = GSeriesSeatStrategy.INSTANCE.getLeftSeatCount(Math.toIntExact(startStationId),
+                                  Math.toIntExact(endStationId), train.getSeats());
+                        TicketInfo ticketInfo1 = new TicketInfo("商务座",
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.BUSINESS_SEAT),1);
+                        TicketInfo ticketInfo2 = new TicketInfo("一等座",
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.FIRST_CLASS_SEAT),1);
+                        TicketInfo ticketInfo3 = new TicketInfo("二等座",
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.SECOND_CLASS_SEAT),1);
+                        TicketInfo ticketInfo4 = new TicketInfo("无座",
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.NO_SEAT),1);
                         ticketInfoList.add(ticketInfo1);
                         ticketInfoList.add(ticketInfo2);
                         ticketInfoList.add(ticketInfo3);
                         ticketInfoList.add(ticketInfo4);
                     }else {
-                        TicketInfo ticketInfo1 = new TicketInfo("软卧",1,1);
-                        TicketInfo ticketInfo2 = new TicketInfo("硬卧",1,1);
-                        TicketInfo ticketInfo3 = new TicketInfo("软座",1,1);
-                        TicketInfo ticketInfo4 = new TicketInfo("硬座",1,1);
-                        TicketInfo ticketInfo5 = new TicketInfo("无座",1 ,1);
+                        Map<KSeriesSeatStrategy.KSeriesSeatType, Integer> leftSeatCount
+                                = KSeriesSeatStrategy.INSTANCE.getLeftSeatCount(Math.toIntExact(startStationId),
+                                Math.toIntExact(endStationId), train.getSeats());
+                        TicketInfo ticketInfo1 = new TicketInfo("软卧",
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SLEEPER_SEAT),1);
+                        TicketInfo ticketInfo2 = new TicketInfo("硬卧",
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.HARD_SLEEPER_SEAT),1);
+                        TicketInfo ticketInfo3 = new TicketInfo("软座",
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SEAT),1);
+                        TicketInfo ticketInfo4 = new TicketInfo("硬座",
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.HARD_SEAT),1);
+                        TicketInfo ticketInfo5 = new TicketInfo("无座", 1000 ,1);
                         ticketInfoList.add(ticketInfo1);
                         ticketInfoList.add(ticketInfo2);
                         ticketInfoList.add(ticketInfo3);
