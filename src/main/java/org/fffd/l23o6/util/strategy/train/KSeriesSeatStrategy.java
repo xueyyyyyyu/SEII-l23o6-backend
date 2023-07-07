@@ -64,72 +64,70 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
         }
     }
 
-
     public @Nullable String allocSeat(int startStationIndex, int endStationIndex, KSeriesSeatType type, boolean[][] seatMap) {
         Map<Integer, String> seatTypeMap = TYPE_MAP.get(type);
-        /*if (type.equals(KSeriesSeatType.SOFT_SLEEPER_SEAT)){
+        int offset = getOffset(type);
 
-        } else if (type.equals(KSeriesSeatType.HARD_SLEEPER_SEAT)){
+        for (int j = 0; j < seatTypeMap.size(); j++) {
+            boolean available = true;
+            for (int i = startStationIndex; i < endStationIndex; i++) {
+                if (seatMap[i][j + offset]) {
+                    available = false;
+                    break;
+                }
+            }
+            if (available) {
+                // 座位可用，更新seatMap
+                for (int i = startStationIndex; i < endStationIndex; i++) {
+                    seatMap[i][j + offset] = true;
+                }
+                return seatTypeMap.get(j + offset);
+            }
+        }
 
-        } else if (type.equals(KSeriesSeatType.SOFT_SEAT)){
+        return null;
+    }
 
-        } else if (type.equals(KSeriesSeatType.HARD_SEAT)){
 
-        }*/
-        return "null";
+    private int getOffset(KSeriesSeatType type) {
+        int offset = 0;
+        for (KSeriesSeatType seatType : TYPE_MAP.keySet()) {
+            if (seatType == type) {
+                break;
+            }
+            offset += TYPE_MAP.get(seatType).size();
+        }
+        return offset;
     }
 
 
     public Map<KSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
-        Map<KSeriesSeatStrategy.KSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
-        int count1 = 0, count2 = 0, count3 = 0, count4 = 0;
+        Map<KSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
 
-        int offset = 0;
-        for(int j = 0; j < SOFT_SLEEPER_SEAT_MAP.size(); j++) {
-            for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j + offset])
-                    break;
-                if (i == endStationIndex - 1)
-                    count1++;
+        for (KSeriesSeatType seatType : TYPE_MAP.keySet()) {
+            Map<Integer, String> seatTypeMap = TYPE_MAP.get(seatType);
+            int offset = getOffset(seatType);
+
+            int count = 0;
+            for (int j = 0; j < seatTypeMap.size(); j++) {
+                boolean available = true;
+                for (int i = startStationIndex - 1; i < endStationIndex - 1; i++) {
+                    if (seatMap[i][j + offset]) {
+                        available = false;
+                        break;
+                    }
+                }
+                if (available) {
+                    count++;
+                }
             }
+
+            leftSeatCount.put(seatType, count);
         }
 
-        offset += SOFT_SLEEPER_SEAT_MAP.size();
-        for(int j = 0; j < HARD_SLEEPER_SEAT_MAP.size(); j++){
-            for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j + offset])
-                    break;
-                if (i == endStationIndex - 1)
-                    count2++;
-            }
-        }
-
-        offset += HARD_SLEEPER_SEAT_MAP.size();
-        for(int j = 0; j < SOFT_SEAT_MAP.size(); j++){
-            for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j + offset])
-                    break;
-                if (i == endStationIndex - 1)
-                    count3++;
-            }
-        }
-
-        offset += SOFT_SEAT_MAP.size();
-        for(int j = 0; j < HARD_SEAT_MAP.size(); j++){
-            for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j + offset])
-                    break;
-                if (i == endStationIndex - 1)
-                    count4++;
-            }
-        }
-
-        leftSeatCount.put(KSeriesSeatType.SOFT_SLEEPER_SEAT,count1);
-        leftSeatCount.put(KSeriesSeatType.HARD_SLEEPER_SEAT, count2);
-        leftSeatCount.put(KSeriesSeatType.SOFT_SEAT, count3);
-        leftSeatCount.put(KSeriesSeatType.HARD_SEAT, count4);
         return leftSeatCount;
     }
+
 
     public boolean[][] initSeatMap(int stationCount) {
         return new boolean[stationCount - 1][SOFT_SLEEPER_SEAT_MAP.size() + HARD_SLEEPER_SEAT_MAP.size() + SOFT_SEAT_MAP.size() + HARD_SEAT_MAP.size()];

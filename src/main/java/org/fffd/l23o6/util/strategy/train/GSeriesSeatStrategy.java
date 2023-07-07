@@ -62,49 +62,107 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
 
     public @Nullable String allocSeat(int startStationIndex, int endStationIndex, GSeriesSeatType type, boolean[][] seatMap) {
         Map<Integer, String> currentSeatMap = TYPE_MAP.get(type);
+        int offset = getOffset(type);
 
-        return "null";
+        for (int j = 0; j < currentSeatMap.size(); j++) {
+            boolean available = true;
+            for (int i = startStationIndex; i < endStationIndex; i++) {
+                if (seatMap[i][j + offset]) {
+                    available = false;
+                    break;
+                }
+            }
+            if (available) {
+                // 座位可用，更新seatMap
+                for (int i = startStationIndex; i < endStationIndex; i++) {
+                    seatMap[i][j + offset] = true;
+                }
+                return currentSeatMap.get(j + offset);
+            }
+        }
+
+        return null;
+    }
+
+    private int getOffset(GSeriesSeatType type) {
+        int offset = 0;
+        for (GSeriesSeatType seatType : TYPE_MAP.keySet()) {
+            if (seatType == type) {
+                break;
+            }
+            offset += TYPE_MAP.get(seatType).size();
+        }
+        return offset;
     }
 
     public Map<GSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
         Map<GSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
-        int count1 = 0, count2 = 0, count3 = 0;
 
-        int offset = 0;
-        for(int j = 0; j < BUSINESS_SEAT_MAP.size(); j++) {
-            for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j + offset])
-                    break;
-                if (i == endStationIndex - 1)
-                    count1++;
+        for (GSeriesSeatType seatType : TYPE_MAP.keySet()) {
+            Map<Integer, String> seatTypeMap = TYPE_MAP.get(seatType);
+            int offset = getOffset(seatType);
+
+            int count = 0;
+            for (int j = 0; j < seatTypeMap.size(); j++) {
+                boolean available = true;
+                for (int i = startStationIndex - 1; i < endStationIndex - 1; i++) {
+                    if (seatMap[i][j + offset]) {
+                        available = false;
+                        break;
+                    }
+                }
+                if (available) {
+                    count++;
+                }
             }
+
+            leftSeatCount.put(seatType, count);
         }
 
-        offset += BUSINESS_SEAT_MAP.size();
-        for(int j = 0; j < FIRST_CLASS_SEAT_MAP.size(); j++){
-            for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j + offset])
-                    break;
-                if (i == endStationIndex - 1)
-                    count2++;
-            }
-        }
-
-        offset += FIRST_CLASS_SEAT_MAP.size();
-        for(int j = 0; j < SECOND_CLASS_SEAT_MAP.size(); j++){
-            for (int i = startStationIndex; i < endStationIndex; i++) {
-                if (seatMap[i][j + offset])
-                    break;
-                if (i == endStationIndex - 1)
-                    count3++;
-            }
-        }
-
-        leftSeatCount.put(GSeriesSeatType.BUSINESS_SEAT,count1);
-        leftSeatCount.put(GSeriesSeatType.FIRST_CLASS_SEAT, count2);
-        leftSeatCount.put(GSeriesSeatType.SECOND_CLASS_SEAT, count3);
         return leftSeatCount;
     }
+
+
+/*        public Map<GSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
+            Map<GSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
+            int count1 = 0, count2 = 0, count3 = 0;
+
+            int offset = 0;
+            for(int j = 0; j < BUSINESS_SEAT_MAP.size(); j++) {
+                for (int i = startStationIndex; i < endStationIndex; i++) {
+                    if (seatMap[i][j + offset])
+                        break;
+                    if (i == endStationIndex - 1)
+                        count1++;
+                }
+            }
+
+            offset += BUSINESS_SEAT_MAP.size();
+            for(int j = 0; j < FIRST_CLASS_SEAT_MAP.size(); j++){
+                for (int i = startStationIndex; i < endStationIndex; i++) {
+                    if (seatMap[i][j + offset])
+                        break;
+                    if (i == endStationIndex - 1)
+                        count2++;
+                }
+            }
+
+            offset += FIRST_CLASS_SEAT_MAP.size();
+            for(int j = 0; j < SECOND_CLASS_SEAT_MAP.size(); j++){
+                for (int i = startStationIndex; i < endStationIndex; i++) {
+                    if (seatMap[i][j + offset])
+                        break;
+                    if (i == endStationIndex - 1)
+                        count3++;
+                }
+            }
+
+            leftSeatCount.put(GSeriesSeatType.BUSINESS_SEAT,count1);
+            leftSeatCount.put(GSeriesSeatType.FIRST_CLASS_SEAT, count2);
+            leftSeatCount.put(GSeriesSeatType.SECOND_CLASS_SEAT, count3);
+            return leftSeatCount;
+        }*/
+
 
 
 
