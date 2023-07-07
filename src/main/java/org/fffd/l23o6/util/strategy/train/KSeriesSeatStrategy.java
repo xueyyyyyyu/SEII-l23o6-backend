@@ -15,12 +15,14 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
     private final Map<Integer, String> HARD_SLEEPER_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> SOFT_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> HARD_SEAT_MAP = new HashMap<>();
+    private final Map<Integer, String> NO_SEAT_MAP = new HashMap<>();
 
     private final Map<KSeriesSeatType, Map<Integer, String>> TYPE_MAP = new HashMap<>() {{
         put(KSeriesSeatType.SOFT_SLEEPER_SEAT, SOFT_SLEEPER_SEAT_MAP);
         put(KSeriesSeatType.HARD_SLEEPER_SEAT, HARD_SLEEPER_SEAT_MAP);
         put(KSeriesSeatType.SOFT_SEAT, SOFT_SEAT_MAP);
         put(KSeriesSeatType.HARD_SEAT, HARD_SEAT_MAP);
+        put(KSeriesSeatType.NO_SEAT, NO_SEAT_MAP);
     }};
 
 
@@ -43,6 +45,11 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
         for (String s : Arrays.asList("3车1座", "3车2座", "3车3座", "3车4座", "3车5座", "3车6座", "3车7座", "3车8座", "3车9座", "3车10座", "4车1座", "4车2座", "4车3座", "4车4座", "4车5座", "4车6座", "4车7座", "4车8座", "4车9座", "4车10座")) {
             HARD_SEAT_MAP.put(counter++, s);
         }
+
+        for (String s : Arrays.asList("无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座")) {
+            NO_SEAT_MAP.put(counter++, s);
+        }
+
     }
 
     public enum KSeriesSeatType implements SeatType {
@@ -130,6 +137,7 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
 
 
     public boolean[][] initSeatMap(int stationCount) {
-        return new boolean[stationCount - 1][SOFT_SLEEPER_SEAT_MAP.size() + HARD_SLEEPER_SEAT_MAP.size() + SOFT_SEAT_MAP.size() + HARD_SEAT_MAP.size()];
+        return new boolean[stationCount - 1][SOFT_SLEEPER_SEAT_MAP.size() + HARD_SLEEPER_SEAT_MAP.size()
+                + SOFT_SEAT_MAP.size() + HARD_SEAT_MAP.size() + NO_SEAT_MAP.size()];
     }
 }

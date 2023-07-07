@@ -14,11 +14,13 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
     private final Map<Integer, String> BUSINESS_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> FIRST_CLASS_SEAT_MAP = new HashMap<>();
     private final Map<Integer, String> SECOND_CLASS_SEAT_MAP = new HashMap<>();
+    private final Map<Integer, String> NO_SEAT_MAP = new HashMap<>();
 
     private final Map<GSeriesSeatType, Map<Integer, String>> TYPE_MAP = new HashMap<>() {{
         put(GSeriesSeatType.BUSINESS_SEAT, BUSINESS_SEAT_MAP);
         put(GSeriesSeatType.FIRST_CLASS_SEAT, FIRST_CLASS_SEAT_MAP);
         put(GSeriesSeatType.SECOND_CLASS_SEAT, SECOND_CLASS_SEAT_MAP);
+        put(GSeriesSeatType.NO_SEAT, NO_SEAT_MAP);
     }};
 
 
@@ -36,6 +38,10 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
 
         for (String s : Arrays.asList("4车1A","4车1B","4车1C","4车1D","4车2F","4车2A","4车2B","4车2C","4车2D","4车2F","4车3A","4车3B","4车3C","4车3D","4车3F")) {
             SECOND_CLASS_SEAT_MAP.put(counter++, s);
+        }
+
+        for (String s : Arrays.asList("无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座")) {
+            NO_SEAT_MAP.put(counter++, s);
         }
 
     }
@@ -167,6 +173,7 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
 
 
     public boolean[][] initSeatMap(int stationCount) {
-        return new boolean[stationCount - 1][BUSINESS_SEAT_MAP.size() + FIRST_CLASS_SEAT_MAP.size() + SECOND_CLASS_SEAT_MAP.size()];
+        return new boolean[stationCount - 1][BUSINESS_SEAT_MAP.size() + FIRST_CLASS_SEAT_MAP.size()
+                + SECOND_CLASS_SEAT_MAP.size() + NO_SEAT_MAP.size()];
     }
 }
