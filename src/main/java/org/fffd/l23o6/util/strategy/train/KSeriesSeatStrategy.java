@@ -98,14 +98,27 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
 
     private int getOffset(KSeriesSeatType type) {
         int offset = 0;
-        for (KSeriesSeatType seatType : TYPE_MAP.keySet()) {
-            if (seatType == type) {
+
+        switch (type) {
+            case SOFT_SLEEPER_SEAT:
                 break;
-            }
-            offset += TYPE_MAP.get(seatType).size();
+            case HARD_SLEEPER_SEAT:
+                offset += SOFT_SLEEPER_SEAT_MAP.size();
+                break;
+            case SOFT_SEAT:
+                offset += SOFT_SLEEPER_SEAT_MAP.size() + HARD_SLEEPER_SEAT_MAP.size();
+                break;
+            case HARD_SEAT:
+                offset += SOFT_SLEEPER_SEAT_MAP.size() + HARD_SLEEPER_SEAT_MAP.size() + SOFT_SEAT_MAP.size();
+                break;
+            case NO_SEAT:
+                offset += SOFT_SLEEPER_SEAT_MAP.size() + HARD_SLEEPER_SEAT_MAP.size() + SOFT_SEAT_MAP.size() + HARD_SEAT_MAP.size();
+                break;
         }
+
         return offset;
     }
+
 
 
     public Map<KSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {

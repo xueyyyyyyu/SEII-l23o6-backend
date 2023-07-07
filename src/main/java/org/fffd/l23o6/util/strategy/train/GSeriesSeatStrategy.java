@@ -92,14 +92,24 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
 
     private int getOffset(GSeriesSeatType type) {
         int offset = 0;
-        for (GSeriesSeatType seatType : TYPE_MAP.keySet()) {
-            if (seatType == type) {
+
+        switch (type) {
+            case BUSINESS_SEAT:
                 break;
-            }
-            offset += TYPE_MAP.get(seatType).size();
+            case FIRST_CLASS_SEAT:
+                offset += BUSINESS_SEAT_MAP.size();
+                break;
+            case SECOND_CLASS_SEAT:
+                offset += BUSINESS_SEAT_MAP.size() + FIRST_CLASS_SEAT_MAP.size();
+                break;
+            case NO_SEAT:
+                offset += BUSINESS_SEAT_MAP.size() + FIRST_CLASS_SEAT_MAP.size() + SECOND_CLASS_SEAT_MAP.size();
+                break;
         }
+
         return offset;
     }
+
 
     public Map<GSeriesSeatType, Integer> getLeftSeatCount(int startStationIndex, int endStationIndex, boolean[][] seatMap) {
         Map<GSeriesSeatType, Integer> leftSeatCount = new HashMap<>();
