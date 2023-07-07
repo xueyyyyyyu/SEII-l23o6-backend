@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+// 没有使用
 public class AlipayPaymentStrategy extends PaymentStrategy{
 
     private static final String ALIPAY_GATEWAY = "https://openapi.alipay.com/gateway.do";

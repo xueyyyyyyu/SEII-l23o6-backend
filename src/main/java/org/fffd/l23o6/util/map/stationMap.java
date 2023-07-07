@@ -7,6 +7,7 @@ import java.util.Map;
 
 // 默认两个相邻站点只可能有一个距离，在创建 route 的时候更新 map
 // map 保存相邻站点之间的距离
+// 没有使用
 public class stationMap {
     private Map<Pair<Long, Long>, Integer> map = new HashMap<>();
 

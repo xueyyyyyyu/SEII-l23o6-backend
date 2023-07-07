@@ -74,16 +74,19 @@ public class TrainServiceImpl implements TrainService {
                     trainVO.setStartStationId(startStationId);
                     trainVO.setEndStationId(endStationId);
                     TrainDetailVO trainDetailVO = getTrain(trainVO.getId());
+                    List<Long> stationIds = trainDetailVO.getStationIds();
+
                     trainVO.setDepartureTime(getDepartureTimeByStationId(trainDetailVO, startStationId));
                     trainVO.setArrivalTime(getArrivalTimeByStationId(trainDetailVO, endStationId));
+
 
                     List<TicketInfo> ticketInfoList = new ArrayList<>();
 
                     // TODO price
                     if(train.getTrainType().getText().equals("高铁")){
                         Map<GSeriesSeatStrategy.GSeriesSeatType, Integer> leftSeatCount
-                                = GSeriesSeatStrategy.INSTANCE.getLeftSeatCount(startStationId.intValue(),
-                                  endStationId.intValue(), train.getSeats());
+                                = GSeriesSeatStrategy.INSTANCE.getLeftSeatCount(stationId2StationIndex(startStationId, stationIds),
+                                  stationId2StationIndex(endStationId, stationIds), train.getSeats());
                         TicketInfo ticketInfo1 = new TicketInfo("商务座",
                                 leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.BUSINESS_SEAT),80);
                         TicketInfo ticketInfo2 = new TicketInfo("一等座",
@@ -97,8 +100,8 @@ public class TrainServiceImpl implements TrainService {
                         ticketInfoList.add(ticketInfo4);
                     }else {
                         Map<KSeriesSeatStrategy.KSeriesSeatType, Integer> leftSeatCount
-                                = KSeriesSeatStrategy.INSTANCE.getLeftSeatCount(startStationId.intValue(),
-                                endStationId.intValue(), train.getSeats());
+                                = KSeriesSeatStrategy.INSTANCE.getLeftSeatCount(stationId2StationIndex(startStationId, stationIds),
+                                stationId2StationIndex(endStationId, stationIds), train.getSeats());
                         TicketInfo ticketInfo1 = new TicketInfo("软卧",
                                 leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SLEEPER_SEAT),1);
                         TicketInfo ticketInfo2 = new TicketInfo("硬卧",
@@ -123,6 +126,17 @@ public class TrainServiceImpl implements TrainService {
 
         return trainVOs;
     }
+
+    public int stationId2StationIndex(Long stationId, List<Long> stationIds){
+        int index = 0;
+        for(Long id : stationIds){
+            if(id.equals(stationId))
+                break;
+            index++;
+        }
+        return index;
+    }
+
 
     public Date getDepartureTimeByStationId(TrainDetailVO trainDetailVO, Long stationId) {
         List<Long> stationIds = trainDetailVO.getStationIds();
