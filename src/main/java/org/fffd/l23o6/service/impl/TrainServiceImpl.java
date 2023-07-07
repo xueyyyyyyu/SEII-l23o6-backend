@@ -215,7 +215,7 @@ public class TrainServiceImpl implements TrainService {
 
         if (route.getStationIds().size() != arrivalTimes.size()
                 || route.getStationIds().size() != departureTimes.size()) {
-            throw new BizException(CommonErrorType.ILLEGAL_ARGUMENTS, "列表长度错误");
+            throw new BizException(CommonErrorType.ILLEGAL_ARGUMENTS, "时间信息不完整");
         }
 
         train.setExtraInfos(new ArrayList<>(Collections.nCopies(route.getStationIds().size(), "预计正点")));

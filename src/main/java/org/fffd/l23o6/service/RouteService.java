@@ -9,5 +9,5 @@ public interface RouteService {
     List<RouteVO> listRoutes();
     RouteVO getRoute(Long id);
     void editRoute(Long id, String name, List<Long> stationIds);
-
+    void deleteRoute(Long id);
 }
