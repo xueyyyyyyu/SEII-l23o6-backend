@@ -17,6 +17,7 @@ import org.fffd.l23o6.service.OrderService;
 import org.fffd.l23o6.pojo.vo.order.OrderVO;
 import org.fffd.l23o6.util.strategy.train.GSeriesSeatStrategy;
 import org.fffd.l23o6.util.strategy.train.KSeriesSeatStrategy;
+import org.fffd.l23o6.util.strategy.train.TrainSeatStrategy;
 import org.springframework.stereotype.Service;
 
 import io.github.lyc8503.spring.starter.incantation.exception.BizException;
@@ -37,17 +38,12 @@ public class OrderServiceImpl implements OrderService {
         RouteEntity route = routeDao.findById(train.getRouteId()).get();
         int startStationIndex = route.getStationIds().indexOf(fromStationId);
         int endStationIndex = route.getStationIds().indexOf(toStationId);
-        String seat = null;
-        switch (train.getTrainType()) {
-            case HIGH_SPEED:
-                seat = GSeriesSeatStrategy.INSTANCE.allocSeat(startStationIndex, endStationIndex,
-                        GSeriesSeatStrategy.GSeriesSeatType.fromString(seatType), train.getSeats());
-                break;
-            case NORMAL_SPEED:
-                seat = KSeriesSeatStrategy.INSTANCE.allocSeat(startStationIndex, endStationIndex,
-                        KSeriesSeatStrategy.KSeriesSeatType.fromString(seatType), train.getSeats());
-                break;
-        }
+        String seat = switch (train.getTrainType()) {
+            case HIGH_SPEED -> GSeriesSeatStrategy.INSTANCE.allocSeat(startStationIndex, endStationIndex,
+                    GSeriesSeatStrategy.GSeriesSeatType.fromString(seatType), train.getSeats());
+            case NORMAL_SPEED -> KSeriesSeatStrategy.INSTANCE.allocSeat(startStationIndex, endStationIndex,
+                    KSeriesSeatStrategy.KSeriesSeatType.fromString(seatType), train.getSeats());
+        };
         if (seat == null) {
             throw new BizException(BizError.OUT_OF_SEAT);
         }
@@ -96,6 +92,31 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    public int getPriceById(Long id){
+        OrderEntity order = orderDao.findById(id).get();
+        TrainEntity train = trainDao.getReferenceById(order.getTrainId());
+        RouteEntity route = routeDao.getReferenceById(train.getRouteId());
+
+        List<Long> stationIds = route.getStationIds();
+        int startStationIndex = stationIds.indexOf(order.getDepartureStationId());
+        int endStationIndex = stationIds.indexOf(order.getArrivalStationId());
+
+        String seatName = order.getSeat();
+
+        int price = 0;
+        switch (train.getTrainType()) {
+            case HIGH_SPEED -> {
+                GSeriesSeatStrategy.GSeriesSeatType GSeatType = GSeriesSeatStrategy.INSTANCE.getTypeByName(seatName);
+                price = GSeriesSeatStrategy.INSTANCE.getPriceByType(GSeatType, startStationIndex, endStationIndex);
+            }
+            case NORMAL_SPEED -> {
+                KSeriesSeatStrategy.KSeriesSeatType KSeatType = KSeriesSeatStrategy.INSTANCE.getTypeByName(seatName);
+                price = KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeatType, startStationIndex, endStationIndex);
+            }
+        }
+        return price;
+    }
+
     public void cancelOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
 
@@ -103,10 +124,23 @@ public class OrderServiceImpl implements OrderService {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
 
-        // TODO: refund user's money and credits if needed
+        // TODO
         UserEntity user = userDao.getReferenceById(order.getUserId());
-        user.setMoney(user.getMoney() + order.getPrice());
-        user.setCredit(user.getCredit() - order.getPrice() / 20);
+        TrainEntity train = trainDao.getReferenceById(order.getTrainId());
+        RouteEntity route = routeDao.getReferenceById(train.getRouteId());
+
+        List<Long> stationIds = route.getStationIds();
+        int startStationIndex = stationIds.indexOf(order.getArrivalStationId());
+        int endStationIndex = stationIds.indexOf(order.getDepartureStationId());
+
+        String seatName = order.getSeat();
+
+        switch (train.getTrainType()) {
+            case HIGH_SPEED -> GSeriesSeatStrategy.INSTANCE.returnSeat(seatName, startStationIndex, endStationIndex, train.getSeats());
+            case NORMAL_SPEED -> KSeriesSeatStrategy.INSTANCE.returnSeat(seatName, startStationIndex, endStationIndex, train.getSeats());
+        }
+
+        int price = getPriceById(id);
 
         order.setStatus(OrderStatus.CANCELLED);
         orderDao.save(order);
@@ -121,10 +155,12 @@ public class OrderServiceImpl implements OrderService {
 
         // TODO: use payment strategy to pay!
 
+        int price = getPriceById(id);
+
         // update user's credits, so that user can get discount next time
         UserEntity user = userDao.getReferenceById(order.getUserId());
-        user.setMoney(user.getMoney() - order.getPrice());
-        user.setCredit(user.getCredit() + order.getPrice() / 20);
+        user.setMoney(user.getMoney() - price);
+        user.setCredit(user.getCredit() + price);
 
         order.setStatus(OrderStatus.COMPLETED);
         orderDao.save(order);

@@ -40,7 +40,8 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
             SECOND_CLASS_SEAT_MAP.put(counter++, s);
         }
 
-        for (String s : Arrays.asList("无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座")) {
+        for (String s : Arrays.asList("无座01","无座02","无座03","无座04","无座05","无座05","无座06","无座07","无座07","无座08",
+                "无座09","无座10","无座11","无座12","无座13","无座14","无座15","无座16","无座17","无座18")) {
             NO_SEAT_MAP.put(counter++, s);
         }
 
@@ -88,6 +89,46 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
         }
 
         return null;
+    }
+
+    public GSeriesSeatType getTypeByName(String name){
+        GSeriesSeatType seatType;
+        if(name.startsWith("1车")){
+            seatType = GSeriesSeatType.BUSINESS_SEAT;
+        }else if(name.startsWith("2车") || name.startsWith("3车")){
+            seatType = GSeriesSeatType.FIRST_CLASS_SEAT;
+        }else if(name.startsWith("4车")){
+            seatType = GSeriesSeatType.SECOND_CLASS_SEAT;
+        }else{
+            seatType = GSeriesSeatType.NO_SEAT;
+        }
+        return seatType;
+    }
+
+    public int getPriceByType(GSeriesSeatType type, int startStationIndex, int endStationIndex){
+        int res = 0;
+        int stationNum = endStationIndex - startStationIndex;
+        switch (type){
+            case BUSINESS_SEAT -> res = 80 * stationNum;
+            case FIRST_CLASS_SEAT -> res = 60 * stationNum;
+            case SECOND_CLASS_SEAT -> res = 40 * stationNum;
+            case NO_SEAT -> res = 20 * stationNum;
+        }
+        return res;
+    }
+
+    public @Nullable void returnSeat(String name, int startStationIndex, int endStationIndex, boolean[][] seatMap){
+        GSeriesSeatType seatType = getTypeByName(name);
+        Map<Integer, String> seatTypeMap = TYPE_MAP.get(seatType);
+        int offset = getOffset(seatType);
+        for(int j = 0; j < seatTypeMap.size(); j++){
+            if(seatTypeMap.get(j + offset).equals(name)){
+                for(int i = startStationIndex; i < endStationIndex; i++){
+                    seatMap[i][j + offset] = false;
+                }
+                break;
+            }
+        }
     }
 
     private int getOffset(GSeriesSeatType type) {

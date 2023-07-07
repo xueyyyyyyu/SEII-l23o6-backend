@@ -86,19 +86,27 @@ public class TrainServiceImpl implements TrainService {
 
                     List<TicketInfo> ticketInfoList = new ArrayList<>();
 
-                    // TODO price
+                    // TODO
                     if(train.getTrainType().getText().equals("高铁")){
                         Map<GSeriesSeatStrategy.GSeriesSeatType, Integer> leftSeatCount
                                 = GSeriesSeatStrategy.INSTANCE.getLeftSeatCount(startStationIndex,
                                 endStationIndex, train.getSeats());
                         TicketInfo ticketInfo1 = new TicketInfo("商务座",
-                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.BUSINESS_SEAT),80 * stationNum);
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.BUSINESS_SEAT),
+                                GSeriesSeatStrategy.INSTANCE.getPriceByType(GSeriesSeatStrategy.GSeriesSeatType.BUSINESS_SEAT,
+                                        startStationIndex, endStationIndex));
                         TicketInfo ticketInfo2 = new TicketInfo("一等座",
-                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.FIRST_CLASS_SEAT),60 * stationNum);
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.FIRST_CLASS_SEAT),
+                                GSeriesSeatStrategy.INSTANCE.getPriceByType(GSeriesSeatStrategy.GSeriesSeatType.FIRST_CLASS_SEAT,
+                                        startStationIndex, endStationIndex));
                         TicketInfo ticketInfo3 = new TicketInfo("二等座",
-                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.SECOND_CLASS_SEAT),40 * stationNum);
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.SECOND_CLASS_SEAT),
+                                GSeriesSeatStrategy.INSTANCE.getPriceByType(GSeriesSeatStrategy.GSeriesSeatType.SECOND_CLASS_SEAT,
+                                        startStationIndex, endStationIndex));
                         TicketInfo ticketInfo4 = new TicketInfo("无座",
-                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.NO_SEAT),20 * stationNum);
+                                leftSeatCount.get(GSeriesSeatStrategy.GSeriesSeatType.NO_SEAT),
+                                GSeriesSeatStrategy.INSTANCE.getPriceByType(GSeriesSeatStrategy.GSeriesSeatType.NO_SEAT,
+                                        startStationIndex, endStationIndex));
                         ticketInfoList.add(ticketInfo1);
                         ticketInfoList.add(ticketInfo2);
                         ticketInfoList.add(ticketInfo3);
@@ -108,15 +116,25 @@ public class TrainServiceImpl implements TrainService {
                                 = KSeriesSeatStrategy.INSTANCE.getLeftSeatCount(startStationIndex,
                                  endStationIndex, train.getSeats());
                         TicketInfo ticketInfo1 = new TicketInfo("软卧",
-                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SLEEPER_SEAT),50 * stationNum);
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SLEEPER_SEAT),
+                                KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SLEEPER_SEAT,
+                                        startStationIndex, endStationIndex));
                         TicketInfo ticketInfo2 = new TicketInfo("硬卧",
-                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.HARD_SLEEPER_SEAT),40 * stationNum);
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.HARD_SLEEPER_SEAT),
+                                KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeriesSeatStrategy.KSeriesSeatType.HARD_SLEEPER_SEAT,
+                                        startStationIndex, endStationIndex));
                         TicketInfo ticketInfo3 = new TicketInfo("软座",
-                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SEAT),30 * stationNum);
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SEAT),
+                                KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SEAT,
+                                        startStationIndex, endStationIndex));
                         TicketInfo ticketInfo4 = new TicketInfo("硬座",
-                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.HARD_SEAT),20 * stationNum);
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.HARD_SEAT),
+                                KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeriesSeatStrategy.KSeriesSeatType.SOFT_SEAT,
+                                        startStationIndex, endStationIndex));
                         TicketInfo ticketInfo5 = new TicketInfo("无座",
-                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.NO_SEAT),10 * stationNum);
+                                leftSeatCount.get(KSeriesSeatStrategy.KSeriesSeatType.NO_SEAT),
+                                KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeriesSeatStrategy.KSeriesSeatType.NO_SEAT,
+                                        startStationIndex, endStationIndex));
                         ticketInfoList.add(ticketInfo1);
                         ticketInfoList.add(ticketInfo2);
                         ticketInfoList.add(ticketInfo3);

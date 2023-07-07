@@ -46,7 +46,8 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
             HARD_SEAT_MAP.put(counter++, s);
         }
 
-        for (String s : Arrays.asList("无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座","无座")) {
+        for (String s : Arrays.asList("无座01","无座02","无座03","无座04","无座05","无座05","无座06","无座07","无座07","无座08",
+                "无座09","无座10","无座11","无座12","无座13","无座14","无座15","无座16","无座17","无座18")) {
             NO_SEAT_MAP.put(counter++, s);
         }
 
@@ -93,6 +94,49 @@ public class KSeriesSeatStrategy extends TrainSeatStrategy {
         }
 
         return null;
+    }
+
+    public KSeriesSeatType getTypeByName(String name){
+        KSeriesSeatType seatType;
+        if(name.startsWith("软卧")){
+            seatType = KSeriesSeatType.SOFT_SLEEPER_SEAT;
+        }else if(name.startsWith("硬卧")){
+            seatType = KSeriesSeatType.HARD_SLEEPER_SEAT;
+        }else if(name.startsWith("1车") || name.startsWith("2车")){
+            seatType = KSeriesSeatType.SOFT_SEAT;
+        }else if(name.startsWith("3车") || name.startsWith("4车")){
+            seatType = KSeriesSeatType.HARD_SEAT;
+        }else {
+            seatType = KSeriesSeatType.NO_SEAT;
+        }
+        return seatType;
+    }
+
+    public int getPriceByType(KSeriesSeatType type, int startStationIndex, int endStationIndex){
+        int res = 0;
+        int stationNum = endStationIndex - startStationIndex;
+        switch (type){
+            case SOFT_SLEEPER_SEAT -> res = 50 * stationNum;
+            case HARD_SLEEPER_SEAT -> res = 40 * stationNum;
+            case SOFT_SEAT -> res = 30 * stationNum;
+            case HARD_SEAT -> res = 20 * stationNum;
+            case NO_SEAT -> res = 10 * stationNum;
+        }
+        return res;
+    }
+
+    public @Nullable void returnSeat(String name, int startStationIndex, int endStationIndex, boolean[][] seatMap){
+        KSeriesSeatType seatType = getTypeByName(name);
+        Map<Integer, String> seatTypeMap = TYPE_MAP.get(seatType);
+        int offset = getOffset(seatType);
+        for(int j = 0; j < seatTypeMap.size(); j++){
+            if(seatTypeMap.get(j + offset).equals(name)){
+                for(int i = startStationIndex; i < endStationIndex; i++){
+                    seatMap[i][j + offset] = false;
+                }
+                break;
+            }
+        }
     }
 
 
