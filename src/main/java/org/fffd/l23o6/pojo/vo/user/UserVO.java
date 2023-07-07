@@ -9,4 +9,6 @@ public class UserVO {
     private String phone;
     private String idn;
     private String type;
+    private int credit;
+    private int money;
 }
