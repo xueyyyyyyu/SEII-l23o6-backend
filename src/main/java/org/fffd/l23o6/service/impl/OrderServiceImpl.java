@@ -7,6 +7,7 @@ import org.fffd.l23o6.dao.OrderDao;
 import org.fffd.l23o6.dao.RouteDao;
 import org.fffd.l23o6.dao.TrainDao;
 import org.fffd.l23o6.dao.UserDao;
+import org.fffd.l23o6.pojo.entity.UserEntity;
 import org.fffd.l23o6.pojo.enum_.OrderStatus;
 import org.fffd.l23o6.exception.BizError;
 import org.fffd.l23o6.pojo.entity.OrderEntity;
@@ -103,6 +104,9 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // TODO: refund user's money and credits if needed
+        UserEntity user = userDao.getReferenceById(order.getUserId());
+        user.setMoney(user.getMoney() + order.getPrice());
+        user.setCredit(user.getCredit() - order.getPrice() / 20);
 
         order.setStatus(OrderStatus.CANCELLED);
         orderDao.save(order);
@@ -116,7 +120,11 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // TODO: use payment strategy to pay!
-        // TODO: update user's credits, so that user can get discount next time
+
+        // update user's credits, so that user can get discount next time
+        UserEntity user = userDao.getReferenceById(order.getUserId());
+        user.setMoney(user.getMoney() - order.getPrice());
+        user.setCredit(user.getCredit() + order.getPrice() / 20);
 
         order.setStatus(OrderStatus.COMPLETED);
         orderDao.save(order);

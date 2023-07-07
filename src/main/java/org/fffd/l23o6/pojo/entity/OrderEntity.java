@@ -49,4 +49,7 @@ public class OrderEntity {
 
     @UpdateTimestamp
     private Date updatedAt;
+
+    @NotNull
+    private int price;
 }

@@ -105,7 +105,7 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
             int count = 0;
             for (int j = 0; j < seatTypeMap.size(); j++) {
                 boolean available = true;
-                for (int i = startStationIndex - 1; i < endStationIndex - 1; i++) {
+                for (int i = startStationIndex; i < endStationIndex; i++) {
                     if (seatMap[i][j + offset]) {
                         available = false;
                         break;

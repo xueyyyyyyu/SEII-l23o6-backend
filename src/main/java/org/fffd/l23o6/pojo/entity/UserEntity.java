@@ -25,7 +25,7 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // userID
 
     @NotNull
     @Column(unique = true)
@@ -37,6 +37,8 @@ public class UserEntity {
     private String phone;
     private String type;
     private String idn;
+    private int credit;
+    private int money;
 
     @CreationTimestamp
     private Date createdAt;
