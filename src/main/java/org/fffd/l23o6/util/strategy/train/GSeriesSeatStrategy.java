@@ -1,7 +1,6 @@
 package org.fffd.l23o6.util.strategy.train;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,7 +90,19 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
         return null;
     }
 
-    public GSeriesSeatType getTypeByName(String name){
+    public int getPriceByType(GSeriesSeatType type, int startStationIndex, int endStationIndex){
+        int res = 0;
+        int stationNum = endStationIndex - startStationIndex;
+        switch (type){
+            case BUSINESS_SEAT -> res = 80 * stationNum;
+            case FIRST_CLASS_SEAT -> res = 60 * stationNum;
+            case SECOND_CLASS_SEAT -> res = 40 * stationNum;
+            case NO_SEAT -> res = 20 * stationNum;
+        }
+        return res;
+    }
+
+    public GSeriesSeatType getTypeBySeatName(String name){
         GSeriesSeatType seatType;
         if(name.startsWith("1车")){
             seatType = GSeriesSeatType.BUSINESS_SEAT;
@@ -105,20 +116,8 @@ public class GSeriesSeatStrategy extends TrainSeatStrategy {
         return seatType;
     }
 
-    public int getPriceByType(GSeriesSeatType type, int startStationIndex, int endStationIndex){
-        int res = 0;
-        int stationNum = endStationIndex - startStationIndex;
-        switch (type){
-            case BUSINESS_SEAT -> res = 80 * stationNum;
-            case FIRST_CLASS_SEAT -> res = 60 * stationNum;
-            case SECOND_CLASS_SEAT -> res = 40 * stationNum;
-            case NO_SEAT -> res = 20 * stationNum;
-        }
-        return res;
-    }
-
     public @Nullable void returnSeat(String name, int startStationIndex, int endStationIndex, boolean[][] seatMap){
-        GSeriesSeatType seatType = getTypeByName(name);
+        GSeriesSeatType seatType = getTypeBySeatName(name);
         Map<Integer, String> seatTypeMap = TYPE_MAP.get(seatType);
         int offset = getOffset(seatType);
         for(int j = 0; j < seatTypeMap.size(); j++){

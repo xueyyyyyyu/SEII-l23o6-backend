@@ -17,7 +17,6 @@ import org.fffd.l23o6.service.OrderService;
 import org.fffd.l23o6.pojo.vo.order.OrderVO;
 import org.fffd.l23o6.util.strategy.train.GSeriesSeatStrategy;
 import org.fffd.l23o6.util.strategy.train.KSeriesSeatStrategy;
-import org.fffd.l23o6.util.strategy.train.TrainSeatStrategy;
 import org.springframework.stereotype.Service;
 
 import io.github.lyc8503.spring.starter.incantation.exception.BizException;
@@ -103,17 +102,14 @@ public class OrderServiceImpl implements OrderService {
 
         String seatName = order.getSeat();
 
-        int price = 0;
-        switch (train.getTrainType()) {
-            case HIGH_SPEED -> {
-                GSeriesSeatStrategy.GSeriesSeatType GSeatType = GSeriesSeatStrategy.INSTANCE.getTypeByName(seatName);
-                price = GSeriesSeatStrategy.INSTANCE.getPriceByType(GSeatType, startStationIndex, endStationIndex);
-            }
-            case NORMAL_SPEED -> {
-                KSeriesSeatStrategy.KSeriesSeatType KSeatType = KSeriesSeatStrategy.INSTANCE.getTypeByName(seatName);
-                price = KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeatType, startStationIndex, endStationIndex);
-            }
-        }
+        int price = switch (train.getTrainType()) {
+            case HIGH_SPEED ->
+                GSeriesSeatStrategy.INSTANCE.getPriceByType(GSeriesSeatStrategy.INSTANCE.getTypeBySeatName(seatName),
+                        startStationIndex, endStationIndex);
+            case NORMAL_SPEED ->
+                KSeriesSeatStrategy.INSTANCE.getPriceByType(KSeriesSeatStrategy.INSTANCE.getTypeByName(seatName),
+                        startStationIndex, endStationIndex);
+        };
         return price;
     }
 
