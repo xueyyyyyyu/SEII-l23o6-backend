@@ -124,8 +124,7 @@ public class OrderServiceImpl implements OrderService {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
 
-        // TODO
-        UserEntity user = userDao.getReferenceById(order.getUserId());
+        // TODO 返还座位
         TrainEntity train = trainDao.getReferenceById(order.getTrainId());
         RouteEntity route = routeDao.getReferenceById(train.getRouteId());
 
@@ -140,28 +139,39 @@ public class OrderServiceImpl implements OrderService {
             case NORMAL_SPEED -> KSeriesSeatStrategy.INSTANCE.returnSeat(seatName, startStationIndex, endStationIndex, train.getSeats());
         }
 
-        int price = getPriceById(id);
-
         order.setStatus(OrderStatus.CANCELLED);
         orderDao.save(order);
     }
 
     public void payOrder(Long id) {
         OrderEntity order = orderDao.findById(id).get();
-
         if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
             throw new BizException(BizError.ILLEAGAL_ORDER_STATUS);
         }
 
         // TODO: use payment strategy to pay!
-
-        int price = getPriceById(id);
-
-        // update user's credits, so that user can get discount next time
         UserEntity user = userDao.getReferenceById(order.getUserId());
-        user.setMoney(user.getMoney() - price);
-        user.setCredit(user.getCredit() + price);
-
+        int credit = user.getCredit();
+        int price_order = getPriceById(id);
+        int price_pay = price_order;
+        int credit_left;
+        if (credit >= 50000) {
+            credit_left = credit - 50000;
+            price_pay = price_pay - 118;
+        } else if (credit >= 10000) {
+            credit_left = credit - 10000;
+            price_pay = price_pay - 18;
+        } else if (credit >= 3000) {
+            credit_left = credit - 3000;
+            price_pay = price_pay - 4;
+        } else if (credit >= 1000) {
+            credit_left = credit - 1000;
+            price_pay = price_pay - 1;
+        } else {
+            credit_left = credit;
+        }
+        user.setMoney(user.getMoney() - price_pay);
+        user.setCredit(price_order * 100 + credit_left);
         order.setStatus(OrderStatus.COMPLETED);
         orderDao.save(order);
     }
